@@ -1,5 +1,9 @@
 import WebSocket, { WebSocketServer } from 'ws';
 
+function heartbeat() {
+    this.isAlive = true;
+}
+
 const wss = new WebSocketServer(
     {
         port: 5000,
@@ -12,6 +16,8 @@ const broadcastMessage = message => {
 };
 
 wss.on('connection', function (ws) {
+    ws.isAlive = true;
+
     ws.on('message', message => {
         message = JSON.parse(message);
         switch (message.event) {
@@ -23,4 +29,25 @@ wss.on('connection', function (ws) {
                 break;
         }
     });
+    ws.on('pong', heartbeat);
+    ws.on('close', function close() {
+        console.log('Client disconnected');
+    });
+});
+const interval = setInterval(function ping() {
+    wss.clients?.forEach(function each(ws) {
+        if (ws.isAlive === false) {
+            console.log('Client disconnected');
+            return ws.terminate();
+        }
+        ws.isAlive = false;
+        ws.ping();
+    });
+}, 3000);
+
+wss.on('close', function close() {
+    clearInterval(interval);
+});
+wss.on('listening', function listening() {
+    console.log('WebSocket server listening');
 });
