@@ -1,4 +1,6 @@
-import { ChangeEvent, FC, useEffect, useRef, useState } from 'react';
+import { Alert, Button, Card, Input, Space, Spin } from 'antd';
+import { ChangeEvent, FC, useRef, useState } from 'react';
+import styles from './chat.module.scss';
 
 interface Message {
     id: number;
@@ -52,46 +54,74 @@ export const Chat: FC = (): JSX.Element => {
     };
     if (!connected) {
         return (
-            <div className='center'>
-                <div className='form'>
-                    <input
-                        type='text'
+            <div className={styles.centerConnect}>
+                <Space.Compact className={styles.form}>
+                    {connected === false && socket.current !== null && (
+                        <div>
+                            <Alert message='Connection lost. Trying to reconnect...' type='error' />
+                        </div>
+                    )}
+                </Space.Compact>
+                <Space.Compact className={styles.form}>
+                    <Input
+                        className={styles.input}
                         placeholder='Enter your name'
+                        type='text'
                         value={username}
                         onChange={(e: ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)}
+                        onPressEnter={username.length > 0 ? connect : undefined}
                     />
-                    <button onClick={connect}>Enter the chat</button>
-                    {connected === false && socket.current !== null && (
-                        <p>Connection lost. Trying to reconnect...</p>
-                    )}
-                </div>
+                    <Button
+                        className={styles.btn}
+                        type='primary'
+                        onClick={connect}
+                        disabled={username.length <= 0}
+                    >
+                        Enter the chat
+                    </Button>
+                </Space.Compact>
             </div>
         );
     }
 
     return (
-        <div className='center'>
-            <div className='form'>
-                <input
+        <div className={styles.center}>
+            <div className={styles.centerChat}>
+                <Space.Compact className={styles.chat}>
+                    {messages.map((message: Message) => (
+                        <div key={message.id} className='message'>
+                            {message.event === 'connection' ? (
+                                <div>
+                                    <Alert message={`User: ${message.username} connected`} type='success' />
+                                </div>
+                            ) : (
+                                <Card title={message.username} bordered={false} className={styles.card}>
+                                    <p>Message: {message.text}</p>
+                                </Card>
+                            )}
+                        </div>
+                    ))}
+                </Space.Compact>
+            </div>
+            <Space.Compact className={styles.form}>
+                <Input
+                    className={styles.input}
+                    placeholder='Type message'
                     type='text'
                     value={value}
                     onChange={(e: ChangeEvent<HTMLInputElement>) => setValue(e.target.value)}
+                    onPressEnter={value.length > 0 ? sendMessage : undefined}
                 />
-                <button onClick={sendMessage}>Send message</button>
-            </div>
-            <div className='messages'>
-                {messages.map((message: Message) => (
-                    <div key={message.id} className='message'>
-                        {message.event === 'connection' ? (
-                            <div>User: {message.username} connected</div>
-                        ) : (
-                            <div>
-                                {message.username}: {message.text}
-                            </div>
-                        )}
-                    </div>
-                ))}
-            </div>
+
+                <Button
+                    className={styles.btn}
+                    type='primary'
+                    onClick={sendMessage}
+                    disabled={value.length <= 0}
+                >
+                    Send message
+                </Button>
+            </Space.Compact>
         </div>
     );
 };
