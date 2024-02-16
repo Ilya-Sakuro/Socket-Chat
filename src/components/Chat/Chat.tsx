@@ -18,6 +18,11 @@ export const Chat: FC = (): JSX.Element => {
 
     const connect = (): void => {
         socket.current = new WebSocket('ws://localhost:5000');
+        setInterval(() => {
+            if (socket.current?.readyState === WebSocket.OPEN) {
+                socket.current.send('{"type":"ping"}');
+            }
+        }, 30000);
         socket.current.onopen = () => {
             setConnected(true);
             console.log('Chat opened');
@@ -26,6 +31,7 @@ export const Chat: FC = (): JSX.Element => {
                 username,
                 id: Date.now(),
             };
+
             socket.current?.send(JSON.stringify(message));
         };
         socket.current.onmessage = (event: MessageEvent) => {
