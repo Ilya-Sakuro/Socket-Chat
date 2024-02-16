@@ -12,21 +12,29 @@ const wss = new WebSocketServer(
 );
 
 const broadcastMessage = message => {
-    wss.clients.forEach(client => client.send(JSON.stringify(message)));
+    wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify(message));
+        }
+    });
 };
 
 wss.on('connection', function (ws) {
     ws.isAlive = true;
 
     ws.on('message', message => {
-        message = JSON.parse(message);
-        switch (message.event) {
-            case 'message':
-                broadcastMessage(message);
-                break;
-            case 'connection':
-                broadcastMessage(message);
-                break;
+        try {
+            message = JSON.parse(message);
+            switch (message.event) {
+                case 'message':
+                    broadcastMessage(message);
+                    break;
+                case 'connection':
+                    broadcastMessage(message);
+                    break;
+            }
+        } catch (error) {
+            console.error('Error parsing message:', error);
         }
     });
     ws.on('pong', heartbeat);
