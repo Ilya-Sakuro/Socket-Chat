@@ -1,9 +1,11 @@
+import { setWsHeartbeat } from 'ws-heartbeat/client';
 import { Welcome } from 'components/Welcome/Welcome';
 import { FC, useRef, useState } from 'react';
 import { Chat } from './Chat';
 
 export interface IMessage {
     id: number;
+    readonly type?: string;
     event: 'connection' | 'message';
     username: string;
     text?: string;
@@ -17,11 +19,9 @@ export const ChatContainer: FC = () => {
 
     const connect = (): void => {
         socket.current = new WebSocket('ws://localhost:5000');
-        setInterval(() => {
-            if (socket.current?.readyState === WebSocket.OPEN) {
-                socket.current.send('{"type":"ping"}');
-            }
-        }, 30000);
+
+        setWsHeartbeat(socket.current, '{"type":"ping"}', { pingTimeout: 60000, pingInterval: 25000 });
+
         socket.current.onopen = () => {
             setConnected(true);
             console.log('Chat opened');
@@ -35,7 +35,9 @@ export const ChatContainer: FC = () => {
         };
         socket.current.onmessage = (event: MessageEvent) => {
             const message: IMessage = JSON.parse(event.data);
-            setMessages(prev => [message, ...prev]);
+            setMessages(prev =>
+                [message, ...prev].filter(message => (message.type === 'pong' ? null : message)),
+            );
         };
         socket.current.onclose = () => {
             console.log('Chat closed');

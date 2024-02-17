@@ -35,6 +35,9 @@ dependencies:
   ws:
     specifier: ^8.16.0
     version: 8.16.0
+  ws-heartbeat:
+    specifier: ^1.2.0
+    version: 1.2.0
 
 devDependencies:
   '@types/react':
@@ -3372,6 +3375,28 @@ packages:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
     requiresBuild: true
     dev: true
+
+  /ws-heartbeat@1.2.0:
+    resolution: {integrity: sha512-HlN5j2LEFU5O3onX/poHEEwOduF4QYPWrY956CYe+nJQP4tU7aAM+8KciNFlZ1wDEX1/ZnLFP3QNMqnTgMmBkw==}
+    dependencies:
+      ws: 7.5.9
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+    dev: false
+
+  /ws@7.5.9:
+    resolution: {integrity: sha512-F+P9Jil7UiSKSkppIiD94dN07AwvFixvLIj1Og1Rl9GGMuNipJnV9JzjD6XuqmAeiswGvUmNLjr5cFuXwNS77Q==}
+    engines: {node: '>=8.3.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: ^5.0.2
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+    dev: false
 
   /ws@8.16.0:
     resolution: {integrity: sha512-HS0c//TP7Ina87TfiPUz1rQzMhHrl/SG2guqRcTOIUYD2q8uhUdNHZYJUaQ8aTGPzCh+c6oawMKW35nFl1dxyQ==}
