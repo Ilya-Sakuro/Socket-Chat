@@ -14,7 +14,7 @@ interface WelcomeProps {
 export const Welcome: FC<WelcomeProps> = ({ connected, username, connect, setUsername, current }) => {
     return (
         <div className='flex flex-col justify-center w-1/2'>
-            {!connected && <Title className='!text-slate-100'>Welcome to Socket Chat</Title>}
+            {!connected && <Title className='!text-slate-100 text-center'>Welcome to Socket Chat</Title>}
             <CustomInput value={username} onClick={connect} setEvent={setUsername} />
             {!connected && current !== null && <AlertError />}
         </div>
