@@ -87,3 +87,6 @@ textarea:not([rows]) {
 :target {
     scroll-margin-block: 5ex;
 }
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

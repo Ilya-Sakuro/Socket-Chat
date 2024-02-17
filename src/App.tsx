@@ -1,13 +1,12 @@
 import { FC } from 'react';
 import './App.scss';
-import { Chat } from 'components/Chat/Chat.js';
-import Title from 'antd/es/typography/Title';
+
+import { ChatContainer } from 'components/Chat/ChatContainer';
 
 export const App: FC = () => {
     return (
-        <div className='app'>
-            <Title>Welcome to Socket Chat</Title>
-            <Chat />
+        <div className='flex flex-col justify-evenly items-center min-h-screen p-5'>
+            <ChatContainer />
         </div>
     );
 };
