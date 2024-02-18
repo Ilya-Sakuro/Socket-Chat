@@ -1,18 +1,14 @@
-import { Space } from 'antd';
+import { Result, Space } from 'antd';
+import { AlertError } from 'components/AlertError/AlertError';
 import { CustomInput } from 'components/CustomInput/CustomInput';
 import { Message } from 'components/Message/Message';
+import { Welcome } from 'components/Welcome/Welcome';
+import { IMessage, useSocket } from 'contexts/SocketContext';
 
 import { FC, useState } from 'react';
-import { IMessage } from './ChatContainer';
 
-interface Props {
-    messages: IMessage[];
-    username: string;
-    current: WebSocket | null;
-}
-
-export const Chat: FC<Props> = (props: Props) => {
-    const { messages, username, current } = props;
+export const Chat: FC = () => {
+    const { connected, messages, username, socket } = useSocket();
     const [value, setValue] = useState('');
 
     const sendMessage = (): void => {
@@ -22,19 +18,28 @@ export const Chat: FC<Props> = (props: Props) => {
             text: value,
             id: Date.now(),
         };
-        current?.send(JSON.stringify(message));
+        socket?.send(JSON.stringify(message));
         setValue('');
     };
 
-    return (
-        <div className='flex flex-col justify-between w-full'>
-            <Space.Compact className='flex flex-col-reverse items-center'>
-                {messages.map(message => (
-                    <Message key={message.id} message={message} />
-                ))}
-            </Space.Compact>
+    const contentChat = () => {
+        if (!connected && socket === null) {
+            return <Welcome />;
+        }
+        if (!connected && socket !== null) {
+            return <AlertError />;
+        }
+        return (
+            <div className='flex flex-col justify-between w-full'>
+                <Space.Compact className='flex flex-col-reverse items-center'>
+                    {messages.map(message => (
+                        <Message key={message.id} message={message} />
+                    ))}
+                </Space.Compact>
 
-            <CustomInput value={value} onClick={sendMessage} setEvent={setValue} />
-        </div>
-    );
+                <CustomInput value={value} onClick={sendMessage} setEvent={setValue} />
+            </div>
+        );
+    };
+    return contentChat();
 };

@@ -6,7 +6,7 @@ export const AlertError: FC = () => {
     return (
         <Space.Compact className='flex justify-center'>
             <Alert
-                message='Connection lost. Trying to reconnect...'
+                message='OOPS Sorry! Connection lost. Try refreshing the page...'
                 showIcon={true}
                 icon={<LoadingOutlined className='!text-red-400' />}
                 type='error'
