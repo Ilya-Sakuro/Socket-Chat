@@ -46,10 +46,19 @@ export const ChatContainer: FC = () => {
         socket.current.onerror = () => {
             console.error('Chat error');
             setConnected(false);
-            connect();
         };
     };
 
+    if (!connected && socket.current !== null) {
+        const reConnect = setInterval(() => {
+            console.log('Reconnect');
+            connect();
+        }, 3000);
+        setTimeout(() => {
+            console.log('clear Reconnect');
+            clearInterval(reConnect);
+        }, 10000);
+    }
     if (!connected) {
         return (
             <Welcome
