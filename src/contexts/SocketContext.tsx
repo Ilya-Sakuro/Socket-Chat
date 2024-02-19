@@ -1,6 +1,4 @@
-import { AlertError } from 'components/AlertError/AlertError';
-import React, { createContext, FC, ReactNode, useContext, useEffect, useRef, useState } from 'react';
-import { setWsHeartbeat } from 'ws-heartbeat/client';
+import { createContext, FC, ReactNode, useContext, useEffect, useRef, useState } from 'react';
 
 export interface IMessage {
     id: number;
@@ -18,6 +16,16 @@ interface SocketContextProps {
     connected: boolean;
 }
 
+type WebSocketBase = {
+    close: () => void;
+    send: (data: any) => void;
+    addEventListener: <T>(name: 'message' | 'close', listener: (e: T) => void) => void;
+};
+type WsHeartbeatOption = {
+    pingInterval: number;
+    pingTimeout: number;
+};
+
 const SocketContext = createContext<SocketContextProps | undefined>(undefined);
 
 export const useSocket = () => {
@@ -27,6 +35,41 @@ export const useSocket = () => {
     }
     return context;
 };
+
+function setWsHeartbeat(ws: WebSocketBase, pingMessage: string, option?: WsHeartbeatOption) {
+    let pingInterval = 25000;
+    let pingTimeout = 60000;
+    if (option) {
+        if (typeof option.pingInterval === 'number') {
+            pingInterval = option.pingInterval;
+        }
+        if (typeof option.pingTimeout === 'number') {
+            pingTimeout = option.pingTimeout;
+        }
+    }
+    let messageAccepted = false;
+    ws.addEventListener('message', (e: MessageEvent) => {
+        messageAccepted = true;
+    });
+    const pingTimer = setInterval(() => {
+        try {
+            ws.send(pingMessage);
+        } catch (error) {
+            console.error(error);
+        }
+    }, pingInterval);
+    const timeoutTimer = setInterval(() => {
+        if (!messageAccepted) {
+            ws.close();
+        } else {
+            messageAccepted = false;
+        }
+    }, pingTimeout);
+    ws.addEventListener('close', (e: CloseEvent) => {
+        clearInterval(pingTimer);
+        clearInterval(timeoutTimer);
+    });
+}
 
 export const SocketProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const [messages, setMessages] = useState<IMessage[]>([]);
@@ -38,8 +81,7 @@ export const SocketProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const connect = (): void => {
         socketRef.current = new WebSocket('ws://localhost:5000');
 
-        setWsHeartbeat(socketRef.current, '{"type":"ping"}', { pingTimeout: 60000, pingInterval: 25000 });
-
+        setWsHeartbeat(socketRef.current, JSON.stringify({ type: 'ping' }));
         socketRef.current.onopen = () => {
             setConnected(true);
             console.log('Chat opened');
